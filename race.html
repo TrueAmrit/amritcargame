@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head></head>
+<body>
+    <div class="mygame">
+        <div class="score"> </div>
+        <div class="make">
+            <p> Made By: <br> Amrit Gupta</p>
+        </div>
+        <div class="preload">
+            <p>Click Here<br> You hit you loose</p>
+        </div>
+        <div class="playarea"></div>
+        <audio controls id="music" style="width:100%;">
+
+            <source src="bksong.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+
+    </div>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .make {
+            position: absolute;
+            top: 850px;
+            left: 1700px;
+            background: #7914ec;
+            widows: 300px;
+            height: 50px;
+            width: 120px;
+            text-align: center;
+            font-size: 1.2em;
+            color: white;
+            font-family: Poppins;
+            box-shadow: 0 5px 5px #777;
+
+        }
+
+        .car {
+            height: 120px;
+            border-radius: 10px;
+            width: 50px;
+            position: absolute;
+            bottom: 120px;
+            background: url(car2.png);
+            background-repeat: no-repeat;
+            background-size: 50px 120px;
+        }
+
+        .mygame {
+            width: 100%;
+            height: auto;
+            background-image: url("https://wallpapercave.com/wp/wp4511654.jpg");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+
+        .lines {
+            width: 10px;
+            height: 100px;
+            background: white;
+            position: absolute;
+            margin-left: 190px;
+        }
+
+        .playarea {
+            height: 100vh;
+            width: 400px;
+            background: #2c3456;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            border-right: 7px solid #eecb04;
+            border-left: 7px solid #eecb04;
+        }
+
+        .enemy {
+            height: 100px;
+            border-radius: 10px;
+            width: 52px;
+            position: absolute;
+            bottom: 120px;
+            background: url(car.png);
+            background-repeat: no-repeat;
+            background-size: 52px 100px;
+        }
+
+        .score {
+            position: absolute;
+            top: 450px;
+            left: 250px;
+            background: #10ac84;
+            widows: 300px;
+            height: 53px;
+            width: 120px;
+            text-align: center;
+            font-size: 1.5em;
+            color: white;
+            font-family: Poppins;
+            box-shadow: 0 5px 5px #777;
+        }
+
+        .preload {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            background: #ee5253;
+            transform: translate(-50%, -50%);
+            color: white;
+            z-index: 1;
+            text-align: center;
+            border: 1px solid #ff6b6b;
+            padding: 15px;
+            margin: auto;
+            width: 50%;
+            cursor: pointer;
+            font-family: carfont;
+            letter-spacing: 5;
+            font-size: 20px;
+            line-height: 30px;
+            text-transform: upper;
+            box-shadow: 0 5px 5px #777;
+        }
+    </style>
+
+    <script>
+        const score = document.querySelector('.score');
+        const preload = document.querySelector('.preload');
+        const playarea = document.querySelector('.playarea');
+        preload.addEventListener('click', start);
+        var player = {};
+        var keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false }
+
+        document.addEventListener('keydown', keyDown);
+        document.addEventListener('keyup', keyUp);
+
+        function keyDown(e) {
+            e.preventDefault();
+            keys[e.key] = true;
+            console.log("hello amrit")
+
+        }
+        function keyUp(e) {
+            e.preventDefault();
+            keys[e.key] = false;
+
+        }
+        function moveroad() {
+            let lines = document.querySelectorAll('.lines');
+            lines.forEach(function (lines) {
+                if (lines.y >= 750) {
+                    lines.y -= 740;
+                }
+                lines.y += 4;
+                lines.style.top = lines.y + "px";
+            })
+        }
+        function endGame() {
+            player.start = false;
+            preload.classList.remove('hide');
+            preload.innerHTML = "YOU CRASH | Game Over <br> Final score:" + player.score + " " + "<br>Click again to restart";
+            myMusic.pause();
+
+        }
+        function Collide(a, b) {
+            a = a.getBoundingClientRect();
+            b = b.getBoundingClientRect();
+            return !((a.bottom < b.top) || (a.top > b.bottom) || (a.right < b.left) || (a.left > b.right))
+        }
+        function movecar(car) {
+            let enemy = document.querySelectorAll('.enemy');
+            enemy.forEach(function (enemy) {
+
+                if (Collide(car, enemy)) {
+                    endGame();
+                }
+                if (enemy.y >= 750) {
+                    enemy.y = -300;
+                    enemy.style.left = Math.floor(Math.random() * 350) + "px";
+                }
+                enemy.y += 6;
+                enemy.style.top =enemy.y + "px";
+            })
+        }
+        function gamePlay() {
+            let car = document.querySelector('.car');
+            let road = playarea.getBoundingClientRect();
+            console.log(road);
+            if (player.start) {
+                moveroad();
+                movecar(car);
+
+                if (keys.ArrowUp && player.y > (road.top + 70)) {
+                    player.y -= 5
+                }
+                if (keys.ArrowDown && player.y < (road.bottom - 130)) {
+                    player.y += 5
+                }
+                if (keys.ArrowLeft && player.x > 0) {
+                    player.x -= 5
+                }
+                if (keys.ArrowRight && player.x < (road.width - 60)) {
+                    player.x += 5
+                }
+                car.style.top = player.y + "px";
+                car.style.left = player.x + "px";
+                window.requestAnimationFrame(gamePlay);
+                player.score++;
+                score.innerText = "Your Score: " + player.score;
+            }
+        }
+        var myMusic = document.getElementById("music");
+        function start() {
+            preload.classList.add('hide');
+            playarea.innerHTML = "";
+            player.start = true;
+            player.score = 0;
+            window.requestAnimationFrame(gamePlay);
+            myMusic.play();
+
+
+            for (x = 0; x < 5; x++) {
+                let roadLine = document.createElement('div');
+                roadLine.setAttribute('class', 'lines');
+                roadLine.y = (x * 150);
+                roadLine.style.top = roadLine.y + "px";
+                playarea.appendChild(roadLine);
+            }
+            let car = document.createElement('div');
+            car.setAttribute('class', 'car');
+            playarea.appendChild(car);
+            player.x = car.offsetLeft;
+            player.y = car.offsetTop;
+
+            for (x = 0; x < 3; x++) {
+                let enemyCar = document.createElement('div');
+                enemyCar.setAttribute('class', 'enemy');
+                enemyCar.y = ((x + 1) * 350) * -1;
+                enemyCar.style.top = enemyCar.y + "px";
+                playarea.appendChild(enemyCar);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
